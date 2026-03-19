@@ -1,101 +1,190 @@
-## AI Opportunity Analyzer
+# AI Opportunity Analyzer
 
-AI Opportunity Analyzer is a focused portfolio project that turns a company website URL into a structured, consultant-grade AI opportunity report.
+AI Opportunity Analyzer converts a public company URL into a structured AI strategy brief.
+It is built as an engineering-first consulting workflow, not a chatbot demo.
 
-It is designed to look and feel like a serious AI consulting tool that a CTO, product leader, or client could use in an early discovery conversation.
-
----
-
-### Why this project matters
-
-Most AI demos are chatbots with vague outputs. This project:
-
-- **Frames AI as a consulting workflow**: website → structured diagnosis → opportunity portfolio → architecture recommendation.
-- **Produces structured JSON** that can plug into other tools, CRMs, or internal playbooks.
-- **Demonstrates end-to-end engineering**: scraping, prompt design, FastAPI services, and a clean Next.js UI.
-- **Keeps expectations realistic**: it separates facts from assumptions and surfaces confidence explicitly.
+**Pipeline**: URL -> scrape -> company analysis -> opportunity generation -> prioritization -> architecture/impact -> structured report
 
 ---
 
-### Tech stack
+## Why this project is useful
 
-- **Frontend**: Next.js 15 (App Router), TypeScript, Tailwind CSS
-- **Backend**: Python, FastAPI
-- **LLM access**: OpenRouter-compatible chat API
-- **Scraping**: `requests` + `BeautifulSoup`
-- **Validation**: Pydantic
-- **Architecture**: Clean, modular monorepo (`frontend/`, `backend/`, `docs/`)
+Most AI demos optimize for novelty. This project optimizes for decision quality.
 
----
-
-### High-level architecture
-
-- **Frontend (`frontend/`)**
-  - Single-page app (`app/page.tsx`) with:
-    - URL input and analyze button
-    - Loading and error states
-    - Result sections for company profile, AI opportunities, architecture, impact, and assumptions
-  - Typed client models in `types/analysis.ts`
-  - API helper in `lib/api.ts` calling the FastAPI backend
-
-- **Backend (`backend/`)**
-  - `app/main.py`: FastAPI app, CORS, `/health`, and `/api` router wiring
-  - `app/api/routes.py`: `/api/analyze` endpoint
-  - `app/models/schemas.py`: Request/response Pydantic models
-  - `app/services/scraper.py`: Website fetch and HTML → cleaned text
-  - `app/services/llm_client.py`: Thin OpenRouter chat client
-  - `app/services/analyzer.py`: Multi-step analysis pipeline via an LLM call returning structured JSON
-
-See `docs/ARCHITECTURE.md` for the pipeline and diagram.
+- Produces a **grounded company profile** from public website signals.
+- Generates **specific AI opportunities** tied to the company's offerings.
+- Prioritizes opportunities into **quick wins, mid-term, and strategic bets**.
+- Returns **implementation-ready architecture guidance** with assumptions and confidence.
+- Outputs strict JSON contracts suitable for downstream systems.
 
 ---
 
-### Local setup
+## System design at a glance
 
-#### Backend
+### Frontend (`frontend/`)
+- Next.js 15, TypeScript, Tailwind CSS.
+- Single dashboard flow:
+  - submit URL
+  - review executive summary
+  - inspect grouped opportunities
+  - inspect architecture and confidence sections
+- Typed client contracts in `frontend/types/analysis.ts`.
+
+### Backend (`backend/`)
+- FastAPI API with:
+  - `GET /health`
+  - `POST /api/analyze`
+- Core modules:
+  - `app/services/scraper.py` -> website text extraction
+  - `app/services/llm_client.py` -> provider abstraction (OpenAI/OpenRouter-compatible)
+  - `app/services/analyzer.py` -> multi-agent orchestration and final response assembly
+
+### Multi-agent pipeline
+Each step has a single responsibility and typed JSON output:
+
+1. **CompanyAnalyzerAgent**
+   - Input: scraped website text
+   - Output: company profile (name, industry, services, business model, customer type, summary)
+
+2. **OpportunityGeneratorAgent**
+   - Input: structured company profile
+   - Output: 5-8 specific, service-aligned AI opportunities
+
+3. **PrioritizationAgent**
+   - Input: opportunities
+   - Output: categorized portfolio (`quick_wins`, `mid_term`, `strategic_bets`) + one recommended first pilot
+
+4. **ArchitectureAgent**
+   - Input: prioritized portfolio
+   - Output: architecture, impact areas, risks, assumptions, confidence notes
+
+The orchestrator maps agent outputs to the stable API schema used by the current UI.
+
+---
+
+## Tech stack
+
+- **Frontend**: Next.js 15 (App Router), React 18, TypeScript, Tailwind CSS
+- **Backend**: Python 3.13+, FastAPI, Pydantic v2
+- **HTTP/LLM**: `httpx` for model calls, provider-compatible Chat Completions API
+- **Scraping**: `requests` + `beautifulsoup4`
+- **Validation/contracts**: Pydantic models between all backend stages
+
+---
+
+## API contract
+
+### `POST /api/analyze`
+Request:
+
+```json
+{
+  "url": "https://example.com"
+}
+```
+
+Response shape:
+
+```json
+{
+  "company_profile": {},
+  "ai_opportunities": [],
+  "recommended_architecture": {},
+  "impact_assessment": {},
+  "assumptions": [],
+  "confidence_notes": ""
+}
+```
+
+Primary schema is defined in `backend/app/models/schemas.py`.
+
+---
+
+## Local development
+
+### 1) Backend
 
 ```bash
 cd backend
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install --upgrade pip
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -U pip
 pip install -r requirements.txt
-cp .env.example .env
 ```
 
-Edit `.env` and set:
+Create `backend/.env` with your provider settings:
 
-- `OPENROUTER_API_KEY` – your OpenRouter API key
-- Optionally adjust `OPENROUTER_MODEL`, `SCRAPER_USER_AGENT`, etc.
+```env
+# CORS
+BACKEND_CORS_ORIGINS=["http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"]
 
-Run the API:
+# LLM provider: openai | openrouter
+LLM_PROVIDER=openai
 
-```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# OpenAI
+OPENAI_API_KEY=your_openai_key
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4.1-mini
+
+# OpenRouter (optional if provider=openai)
+OPENROUTER_API_KEY=
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_MODEL=openai/gpt-4.1-mini
+
+# Scraper
+SCRAPER_USER_AGENT=AI-Opportunity-Analyzer/1.0 (+https://your-site.com)
+SCRAPER_TIMEOUT_SECONDS=15
+SCRAPER_MAX_CHARS=12000
+SCRAPER_VERIFY_SSL=true
 ```
 
-#### Frontend
+Run backend:
 
 ```bash
-cd ../frontend
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 2) Frontend
+
+```bash
+cd frontend
 npm install
 cp .env.local.example .env.local
 npm run dev
 ```
 
-Visit `http://localhost:3000`.
+Open `http://localhost:3000`.
 
 ---
 
-### Example workflow
+## Operational notes
 
-1. Open `http://localhost:3000`
-2. Paste a company URL
-3. Click **Analyze**
-4. Review the structured report sections:
-   - Company profile
-   - AI opportunity portfolio
-   - Recommended AI architecture
-   - Impact assessment
-   - Assumptions & confidence
+- CORS is configurable via `BACKEND_CORS_ORIGINS`.
+- Scraping can fail on JS-heavy or bot-protected sites; this is expected for `requests`-based extraction.
+- `SCRAPER_VERIFY_SSL=false` can help in constrained corporate networks with TLS interception (trade-off: weaker TLS validation).
+- API keys must stay in local env/secrets and should never be committed.
+
+---
+
+## Known limitations
+
+- Extraction quality depends on public HTML content quality.
+- Sites that require client-side rendering or authentication may yield insufficient text.
+- LLM output quality is model-dependent and may vary by industry/domain complexity.
+- This tool is advisory and should not be used as an autonomous decision system.
+
+---
+
+## Suggested next steps
+
+- Add persistence for analysis runs and auditability.
+- Add async job processing for larger/longer analyses.
+- Add evaluation harness for prompt/version regression checks.
+- Add deployment IaC (ECS/Fargate or equivalent) for repeatable environments.
+
+---
+
+## Documentation
+
+- Architecture notes: `docs/ARCHITECTURE.md`
 
