@@ -8,7 +8,7 @@ from app.models.schemas import (
     AIOpportunity,
     RecommendedArchitecture,
     ImpactAssessment,
-    ImpactArea,
+    ImpactArea as SchemaImpactArea,
 )
 from app.models.agents import (
     CompanyAnalyzerOutput,
@@ -111,11 +111,12 @@ async def run_full_analysis(website_text: str, input_url: str) -> AnalysisRespon
     )
 
     # Impact assessment
-    impact_areas: List[ImpactArea] = [
-        ImpactArea(
-            area=str(area.get("area", "")),
-            description=str(area.get("description", "")),
-            expected_impact=str(area.get("expected_impact", "")),
+    # Mapping agent ImpactArea to schema ImpactArea
+    impact_areas: List[SchemaImpactArea] = [
+        SchemaImpactArea(
+            area=area.area,
+            description=area.description,
+            expected_impact=area.expected_impact,
         )
         for area in architecture.impact_areas
     ]

@@ -54,13 +54,18 @@ class PrioritizationOutput(BaseModel):
     strategic_bets: List[PrioritizedOpportunity]
 
 
+class ImpactArea(BaseModel):
+    area: str
+    description: str
+    expected_impact: str
+
+
 class ArchitectureOutput(BaseModel):
     overview: str
     components: List[str]
     reasoning: str
     impact_summary: str
-    impact_areas: List[dict]
+    impact_areas: List[ImpactArea]
     risks: List[str]
     assumptions: List[str]
     confidence_notes: str
-
