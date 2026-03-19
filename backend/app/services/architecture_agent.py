@@ -55,9 +55,13 @@ async def run_architecture_agent(
             "role": "user",
             "content": (
                 "Company profile JSON:\n"
-                f"{company.model_dump_json(indent=2, exclude_none=True)}\n\n"
+                "[[[DATA START]]]\n"
+                f"{company.model_dump_json(indent=2, exclude_none=True)}\n"
+                "[[[DATA END]]]\n\n"
                 "Prioritized opportunities JSON:\n"
+                "[[[DATA START]]]\n"
                 f"{portfolio.model_dump_json(indent=2, exclude_none=True)}\n"
+                "[[[DATA END]]]\n"
             ),
         },
     ]

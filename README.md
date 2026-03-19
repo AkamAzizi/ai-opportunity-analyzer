@@ -1,7 +1,7 @@
 # AI Opportunity Analyzer
 
 AI Opportunity Analyzer converts a public company URL into a structured AI strategy brief.
-It is built as an engineering-first consulting workflow, not a chatbot demo.
+It is built as an engineering-first consulting workflow, delivering a premium, consultant-grade experience.
 
 **Pipeline**: URL -> scrape -> company analysis -> opportunity generation -> prioritization -> architecture/impact -> structured report
 
@@ -9,66 +9,47 @@ It is built as an engineering-first consulting workflow, not a chatbot demo.
 
 ## Why this project is useful
 
-Most AI demos optimize for novelty. This project optimizes for decision quality.
+Most AI demos optimize for novelty. This project optimizes for decision quality and professional presentation.
 
-- Produces a **grounded company profile** from public website signals.
-- Generates **specific AI opportunities** tied to the company's offerings.
-- Prioritizes opportunities into **quick wins, mid-term, and strategic bets**.
-- Returns **implementation-ready architecture guidance** with assumptions and confidence.
-- Outputs strict JSON contracts suitable for downstream systems.
+- **Consultant-Grade UI**: A high-end, "Midnight Executive" aesthetic designed for strategy presentations.
+- **Grounded Analysis**: Produces a company profile from real-time public website signals.
+- **Actionable Opportunities**: Generates specific AI initiatives tied to actual company offerings.
+- **Prioritized Portfolio**: Categorizes opportunities into **Quick Wins, Mid-term, and Strategic Bets**.
+- **Implementation-Ready**: Returns architecture guidance with clear assumptions and confidence scores.
+- **Production-Ready Security**: Built-in SSRF protection, rate limiting, and prompt injection guardrails.
 
 ---
 
 ## System design at a glance
 
 ### Frontend (`frontend/`)
-- Next.js 15, TypeScript, Tailwind CSS.
-- Single dashboard flow:
-  - submit URL
-  - review executive summary
-  - inspect grouped opportunities
-  - inspect architecture and confidence sections
-- Typed client contracts in `frontend/types/analysis.ts`.
+- **Next.js 15**, **TypeScript**, **Tailwind CSS**.
+- **Framer Motion** for smooth, staggered animations and transitions.
+- **Lucide Icons** for consistent data visualization.
+- **Progress Stepper & Skeletons**: Real-time feedback during the multi-agent analysis.
+- **Content Security Policy (CSP)**: Robust protection against XSS and unauthorized connections.
 
 ### Backend (`backend/`)
-- FastAPI API with:
-  - `GET /health`
-  - `POST /api/analyze`
-- Core modules:
-  - `app/services/scraper.py` -> website text extraction
-  - `app/services/llm_client.py` -> provider abstraction (OpenAI/OpenRouter-compatible)
-  - `app/services/analyzer.py` -> multi-agent orchestration and final response assembly
-
-### Multi-agent pipeline
-Each step has a single responsibility and typed JSON output:
-
-1. **CompanyAnalyzerAgent**
-   - Input: scraped website text
-   - Output: company profile (name, industry, services, business model, customer type, summary)
-
-2. **OpportunityGeneratorAgent**
-   - Input: structured company profile
-   - Output: 5-8 specific, service-aligned AI opportunities
-
-3. **PrioritizationAgent**
-   - Input: opportunities
-   - Output: categorized portfolio (`quick_wins`, `mid_term`, `strategic_bets`) + one recommended first pilot
-
-4. **ArchitectureAgent**
-   - Input: prioritized portfolio
-   - Output: architecture, impact areas, risks, assumptions, confidence notes
-
-The orchestrator maps agent outputs to the stable API schema used by the current UI.
+- **FastAPI** with integrated **SlowAPI** for rate limiting (5 req/min).
+- **Multi-Agent Pipeline**:
+  - `CompanyAnalyzerAgent`: Website text extraction and profiling.
+  - `OpportunityGeneratorAgent`: Generates service-aligned AI opportunities.
+  - `PrioritizationAgent`: Portfolio categorization and pilot selection.
+  - `ArchitectureAgent`: Technical implementation and impact assessment.
+- **Security Core**:
+  - `scraper.py`: SSRF protection with IP/protocol validation.
+  - `limiter.py`: Centralized rate limiting state.
+  - **Prompt Injection Guardrails**: Delimited data blocks and strict model instructions.
 
 ---
 
 ## Tech stack
 
-- **Frontend**: Next.js 15 (App Router), React 18, TypeScript, Tailwind CSS
-- **Backend**: Python 3.13+, FastAPI, Pydantic v2
-- **HTTP/LLM**: `httpx` for model calls, provider-compatible Chat Completions API
-- **Scraping**: `requests` + `beautifulsoup4`
-- **Validation/contracts**: Pydantic models between all backend stages
+- **Frontend**: Next.js 15 (App Router), React 18, TypeScript, Tailwind CSS, Framer Motion, Lucide.
+- **Backend**: Python 3.13+, FastAPI, Pydantic v2, SlowAPI.
+- **HTTP/LLM**: `httpx` for model calls, provider-compatible Chat Completions API.
+- **Scraping**: `requests` + `beautifulsoup4` + `certifi` for secure SSL.
+- **Validation**: Strict Pydantic models for all inter-agent communication.
 
 ---
 
@@ -76,7 +57,6 @@ The orchestrator maps agent outputs to the stable API schema used by the current
 
 ### `POST /api/analyze`
 Request:
-
 ```json
 {
   "url": "https://example.com"
@@ -84,7 +64,6 @@ Request:
 ```
 
 Response shape:
-
 ```json
 {
   "company_profile": {},
@@ -96,8 +75,6 @@ Response shape:
 }
 ```
 
-Primary schema is defined in `backend/app/models/schemas.py`.
-
 ---
 
 ## Local development
@@ -108,40 +85,19 @@ Primary schema is defined in `backend/app/models/schemas.py`.
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -U pip
 pip install -r requirements.txt
 ```
 
-Create `backend/.env` with your provider settings:
-
+Create `backend/.env`:
 ```env
-# CORS
-BACKEND_CORS_ORIGINS=["http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"]
-
-# LLM provider: openai | openrouter
 LLM_PROVIDER=openai
-
-# OpenAI
-OPENAI_API_KEY=your_openai_key
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=gpt-4.1-mini
-
-# OpenRouter (optional if provider=openai)
-OPENROUTER_API_KEY=
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-OPENROUTER_MODEL=openai/gpt-4.1-mini
-
-# Scraper
-SCRAPER_USER_AGENT=AI-Opportunity-Analyzer/1.0 (+https://your-site.com)
-SCRAPER_TIMEOUT_SECONDS=15
-SCRAPER_MAX_CHARS=12000
-SCRAPER_VERIFY_SSL=true
+OPENAI_API_KEY=your_key
+# ... see app/core/config.py for all settings
 ```
 
 Run backend:
-
 ```bash
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+python -m uvicorn app.main:app --reload --port 8000
 ```
 
 ### 2) Frontend
@@ -149,42 +105,21 @@ python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```bash
 cd frontend
 npm install
-cp .env.local.example .env.local
 npm run dev
 ```
 
-Open `http://localhost:3000`.
-
 ---
 
-## Operational notes
+## Security Features
 
-- CORS is configurable via `BACKEND_CORS_ORIGINS`.
-- Scraping can fail on JS-heavy or bot-protected sites; this is expected for `requests`-based extraction.
-- `SCRAPER_VERIFY_SSL=false` can help in constrained corporate networks with TLS interception (trade-off: weaker TLS validation).
-- API keys must stay in local env/secrets and should never be committed.
-
----
-
-## Known limitations
-
-- Extraction quality depends on public HTML content quality.
-- Sites that require client-side rendering or authentication may yield insufficient text.
-- LLM output quality is model-dependent and may vary by industry/domain complexity.
-- This tool is advisory and should not be used as an autonomous decision system.
-
----
-
-## Suggested next steps
-
-- Add persistence for analysis runs and auditability.
-- Add async job processing for larger/longer analyses.
-- Add evaluation harness for prompt/version regression checks.
-- Add deployment IaC (ECS/Fargate or equivalent) for repeatable environments.
+- **SSRF Protection**: Validates that target URLs resolve to public IPs; blocks internal and metadata IP ranges.
+- **Rate Limiting**: Protects LLM costs and prevents DoS by limiting analysis requests.
+- **Prompt Injection Delimiters**: Uses `[[[DATA START]]]` / `[[[DATA END]]]` patterns to separate untrusted website content from system instructions.
+- **XSS Protection**: Strict CSP headers and React-native escaping for all LLM-generated content.
 
 ---
 
 ## Documentation
 
 - Architecture notes: `docs/ARCHITECTURE.md`
-
+- Security Audit: `SECURITY_VULNERABILITIES.md`

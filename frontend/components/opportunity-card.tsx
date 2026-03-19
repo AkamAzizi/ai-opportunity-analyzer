@@ -36,7 +36,7 @@ export function OpportunityCard({
   highlighted?: boolean;
   bucket?: "Quick Wins" | "Mid-term Opportunities" | "Strategic Bets";
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(highlighted);
   const description = useMemo(() => oneLine(opportunity.description), [opportunity.description]);
 
   const containerClasses = [
@@ -63,7 +63,13 @@ export function OpportunityCard({
           >
             {opportunity.title}
           </h4>
-          <p className="mt-1 line-clamp-1 text-xs leading-relaxed text-secondary">
+          <p
+            className={[
+              "mt-1 text-xs leading-relaxed text-secondary break-words",
+              expanded ? "" : "line-clamp-4"
+            ].join(" ")}
+            title={expanded ? undefined : description}
+          >
             {description}
           </p>
         </div>
@@ -102,12 +108,6 @@ export function OpportunityCard({
                 Why it fits
               </p>
               <ShowMoreText text={opportunity.why_it_fits} collapsedLines={3} />
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-secondary">
-                Additional context
-              </p>
-              <ShowMoreText text={opportunity.description} collapsedLines={3} />
             </div>
           </motion.div>
         ) : null}

@@ -81,7 +81,9 @@ async def run_prioritization_agent(
             "role": "user",
             "content": (
                 "Here is the list of AI opportunities in JSON format:\n"
+                "[[[DATA START]]]\n"
                 f"{opportunities.model_dump_json(indent=2, exclude_none=True)}\n"
+                "[[[DATA END]]]\n"
             ),
         },
     ]

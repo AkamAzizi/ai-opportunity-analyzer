@@ -1,15 +1,17 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.models.schemas import AnalysisResponse, AnalyzeRequest
 from app.services.analyzer import run_full_analysis
 from app.services.scraper import extract_visible_text
+from app.core.limiter import limiter
 
 router = APIRouter()
 
 
 @router.post("/analyze", response_model=AnalysisResponse)
-async def analyze_company(payload: AnalyzeRequest) -> AnalysisResponse:
+@limiter.limit("5/minute")
+async def analyze_company(payload: AnalyzeRequest, request: Request) -> AnalysisResponse:
     url = str(payload.url)
 
     try:
