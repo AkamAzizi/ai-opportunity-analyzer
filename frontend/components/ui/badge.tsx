@@ -1,13 +1,24 @@
 import { clsx } from "clsx";
 
-type BadgeTone = "slate" | "emerald" | "amber" | "rose" | "brand";
+type BadgeTone =
+  | "slate"
+  | "emerald"
+  | "amber"
+  | "rose"
+  | "brand"
+  | "industry"
+  | "business"
+  | "customer";
 
 const toneClasses: Record<BadgeTone, string> = {
-  slate: "border-border bg-canvas text-secondary",
-  emerald: "border-border bg-canvas text-secondary",
-  amber: "border-border bg-canvas text-secondary",
-  rose: "border-border bg-canvas text-secondary",
-  brand: "border-accent/30 bg-accent/10 text-primary"
+  slate: "border-border bg-white text-secondary",
+  emerald: "border-success/30 bg-success/10 text-primary",
+  amber: "border-warning/30 bg-warning/10 text-primary",
+  rose: "border-warning/30 bg-warning/10 text-primary",
+  brand: "border-accent/30 bg-accent/10 text-primary",
+  industry: "border-blue-200 bg-blue-50 text-blue-700",
+  business: "border-violet-200 bg-violet-50 text-violet-700",
+  customer: "border-slate-200 bg-slate-100 text-slate-700"
 };
 
 export function Badge({

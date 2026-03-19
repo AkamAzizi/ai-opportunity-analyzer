@@ -48,6 +48,16 @@ def _normalize_company_name(name: Any, input_url: str) -> str:
     }
     if cleaned.lower() in weak:
         return _domain_brand_fallback(input_url)
+
+    # If the model drops the first letter of the hostname brand (e.g. "Eahead"
+    # vs domain weahead → "Weahead"), prefer the domain-derived name — it's
+    # grounded in the URL the user submitted.
+    domain_brand = _domain_brand_fallback(input_url)
+    dl = domain_brand.lower()
+    cl = cleaned.lower()
+    if len(dl) >= 2 and cl == dl[1:]:
+        return domain_brand
+
     return cleaned
 
 

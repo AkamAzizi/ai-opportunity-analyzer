@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Clock3, TrendingUp } from "lucide-react";
 import type { AIOpportunity } from "@/types/analysis";
 import { Badge } from "@/components/ui/badge";
 import { ShowMoreText } from "@/components/ui/show-more-text";
@@ -27,17 +29,21 @@ function oneLine(text: string): string {
 
 export function OpportunityCard({
   opportunity,
-  highlighted = false
+  highlighted = false,
+  bucket
 }: {
   opportunity: AIOpportunity;
   highlighted?: boolean;
+  bucket?: "Quick Wins" | "Mid-term Opportunities" | "Strategic Bets";
 }) {
   const [expanded, setExpanded] = useState(false);
   const description = useMemo(() => oneLine(opportunity.description), [opportunity.description]);
 
   const containerClasses = [
-    "rounded-xl border bg-card",
-    highlighted ? "border-accent/40 p-6" : "border-border p-5"
+    "rounded-xl border bg-card p-4 transition-transform duration-200 hover:-translate-y-1 sm:p-6",
+    highlighted ? "border-accent/40" : "border-border",
+    bucket === "Quick Wins" ? "border-l-4 border-l-success" : "",
+    bucket === "Strategic Bets" ? "border-l-4 border-l-warning" : ""
   ].join(" ");
 
   return (
@@ -65,9 +71,11 @@ export function OpportunityCard({
 
       <div className="mt-3 flex flex-wrap gap-2">
         <Badge tone={toneForComplexity(opportunity.complexity)}>
+          <Clock3 className="h-3 w-3" />
           Complexity: {opportunity.complexity}
         </Badge>
         <Badge tone={toneForBusinessValue(opportunity.business_value)}>
+          <TrendingUp className="h-3 w-3" />
           Value: {opportunity.business_value}
         </Badge>
       </div>
@@ -80,12 +88,30 @@ export function OpportunityCard({
         {expanded ? "Hide details" : "View details \u2192"}
       </button>
 
-      {expanded ? (
-        <div className="mt-3 space-y-3">
-          <ShowMoreText text={opportunity.why_it_fits} collapsedLines={3} />
-          <ShowMoreText text={opportunity.description} collapsedLines={3} />
-        </div>
-      ) : null}
+      <AnimatePresence initial={false}>
+        {expanded ? (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="mt-3 space-y-3 overflow-hidden"
+          >
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                Why it fits
+              </p>
+              <ShowMoreText text={opportunity.why_it_fits} collapsedLines={3} />
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-secondary">
+                Additional context
+              </p>
+              <ShowMoreText text={opportunity.description} collapsedLines={3} />
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

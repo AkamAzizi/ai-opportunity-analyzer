@@ -17,7 +17,7 @@ export function SectionCard({
   return (
     <section
       className={clsx(
-        "rounded-xl border border-border bg-card p-6",
+        "rounded-xl border border-border bg-card p-4 transition-transform duration-200 hover:-translate-y-1 sm:p-6 lg:p-8",
         className
       )}
     >

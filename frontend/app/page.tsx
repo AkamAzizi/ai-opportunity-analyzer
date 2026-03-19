@@ -1,19 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UrlForm } from "@/components/url-form";
 import { AnalysisResult } from "@/components/analysis-result";
 import type { AnalysisResponse } from "@/types/analysis";
 import { analyzeCompany } from "@/lib/api";
+import { ProgressStepper, type PipelineStage } from "@/components/ui/progress-stepper";
+import { SkeletonReport } from "@/components/ui/skeleton-report";
 
 export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [stage, setStage] = useState<PipelineStage | null>(null);
+
+  useEffect(() => {
+    if (!loading) return;
+
+    const steps: PipelineStage[] = [
+      "scraping",
+      "analyzing",
+      "generating",
+      "architecting"
+    ];
+
+    let index = 0;
+    setStage(steps[index]);
+
+    const interval = setInterval(() => {
+      index = Math.min(index + 1, steps.length - 1);
+      setStage(steps[index]);
+    }, 1200);
+
+    return () => clearInterval(interval);
+  }, [loading]);
 
   const handleAnalyze = async (url: string) => {
     setError(null);
     setLoading(true);
+    setStage("scraping");
     try {
       const result = await analyzeCompany(url);
       setAnalysis(result);
@@ -24,13 +49,14 @@ export default function HomePage() {
       setAnalysis(null);
     } finally {
       setLoading(false);
+      setStage(null);
     }
   };
 
   return (
     <main className="mx-auto flex min-h-screen max-w-[900px] flex-col px-4 py-12 sm:px-6">
       <header className="mb-10 space-y-3">
-        <h1 className="text-3xl font-semibold tracking-tight text-primary sm:text-4xl">
+        <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
           AI Opportunity Analyzer
         </h1>
         <p className="max-w-2xl text-sm leading-relaxed text-secondary">
@@ -44,8 +70,12 @@ export default function HomePage() {
         {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}
       </section>
 
+      <section className="mb-6">
+        <ProgressStepper activeStage={stage} />
+      </section>
+
       <section className="flex-1 pb-12">
-        <AnalysisResult data={analysis} />
+        {loading ? <SkeletonReport /> : <AnalysisResult data={analysis} />}
       </section>
 
       <footer className="mt-14 border-t border-border pt-5 text-xs leading-relaxed text-secondary">

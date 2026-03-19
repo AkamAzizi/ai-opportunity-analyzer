@@ -24,6 +24,7 @@ Output JSON with this exact shape:
 }
 
 Notes:
+- "name" must match how the brand appears in titles/headers/logo (including the first letter; never drop a leading character).
 - "services" should list 3–8 short bullet-style items describing concrete offerings.
 - "summary" should be 2–4 short sentences, specific to this company.
 """.strip()
