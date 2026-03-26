@@ -100,6 +100,11 @@ Run backend:
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
+If you prefer running from the repo root (without `cd backend`), use:
+```bash
+PYTHONPATH=backend python -m uvicorn app.main:app --reload --port 8000
+```
+
 ### 2) Frontend
 
 ```bash

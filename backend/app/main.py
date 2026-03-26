@@ -4,9 +4,16 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
-from app.api.routes import router as api_router
-from app.core.config import get_settings
-from app.core.limiter import limiter
+try:
+    # When running from `backend/` (e.g. `uvicorn app.main:app`)
+    from app.api.routes import router as api_router
+    from app.core.config import get_settings
+    from app.core.limiter import limiter
+except ModuleNotFoundError:  # pragma: no cover
+    # When running from the repo root (e.g. `uvicorn backend.app.main:app`)
+    from backend.app.api.routes import router as api_router
+    from backend.app.core.config import get_settings
+    from backend.app.core.limiter import limiter
 
 settings = get_settings()
 
