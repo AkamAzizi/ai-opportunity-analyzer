@@ -9,4 +9,4 @@ COPY . .
 
 RUN npm run build
 
-CMD ["npm","start"]
+CMD ["sh","-c","npm start -- -H 0.0.0.0 -p ${PORT:-8080}"]

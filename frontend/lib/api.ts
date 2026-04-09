@@ -1,11 +1,7 @@
 import type { AnalysisResponse } from "@/types/analysis";
 
-const DEFAULT_BACKEND_URL = "http://localhost:8000";
-
 export async function analyzeCompany(url: string): Promise<AnalysisResponse> {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || DEFAULT_BACKEND_URL;
-
-  const res = await fetch(`${backendUrl}/api/analyze`, {
+  const res = await fetch("/api/analyze", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

@@ -107,11 +107,18 @@ PYTHONPATH=backend python -m uvicorn app.main:app --reload --port 8000
 
 ### 2) Frontend
 
+Create `frontend/.env.local`:
+```env
+BACKEND_URL=http://localhost:8000
+```
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
+For Cloud Run frontend deployment, set `BACKEND_URL` to your backend service URL (for example `https://ai-opportunity-analyzer-2-167158120787.europe-west1.run.app`).
 
 ---
 
