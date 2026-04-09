@@ -9,7 +9,7 @@ settings = get_settings()
 
 class LLMClient:
     """
-    Minimal Chat Completions client supporting OpenRouter or OpenAI.
+    Minimal Chat Completions client for OpenAI.
     """
 
     def __init__(
@@ -18,28 +18,17 @@ class LLMClient:
         base_url: Optional[str] = None,
         model: Optional[str] = None,
     ) -> None:
-        provider = (settings.LLM_PROVIDER or "openrouter").strip().lower()
-        if provider not in {"openrouter", "openai"}:
-            raise ValueError("LLM_PROVIDER must be 'openrouter' or 'openai'")
-
-        self.provider = provider
-
-        if provider == "openai":
-            self.api_key = api_key or settings.OPENAI_API_KEY
-            self.base_url = base_url or settings.OPENAI_BASE_URL
-            self.model = model or settings.OPENAI_MODEL
-            missing_key_name = "OPENAI_API_KEY"
-        else:
-            self.api_key = api_key or settings.OPENROUTER_API_KEY
-            self.base_url = base_url or settings.OPENROUTER_BASE_URL
-            self.model = model or settings.OPENROUTER_MODEL
-            missing_key_name = "OPENROUTER_API_KEY"
+        self.provider = "openai"
+        self.api_key = api_key or settings.OPENAI_API_KEY
+        self.base_url = base_url or settings.OPENAI_BASE_URL
+        self.model = model or settings.OPENAI_MODEL
+        missing_key_name = "OPENAI_API_KEY"
 
         if not self.api_key:
             raise ValueError(f"{missing_key_name} is not set")
 
     async def chat(self, messages: List[Dict[str, str]], response_format: str = "json") -> str:
-        if self.api_key.strip().lower() in {"sk-your-openrouter-key-here", "sk-your-openai-key-here"}:
+        if self.api_key.strip().lower() in {"sk-your-openai-key-here"}:
             raise ValueError(
                 "LLM API key is still set to a placeholder. Update your .env with a real key."
             )

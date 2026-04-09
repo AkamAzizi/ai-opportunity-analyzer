@@ -90,7 +90,6 @@ pip install -r requirements.txt
 
 Create `backend/.env`:
 ```env
-LLM_PROVIDER=openai
 OPENAI_API_KEY=your_key
 # ... see app/core/config.py for all settings
 ```

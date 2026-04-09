@@ -19,21 +19,6 @@ class Settings(BaseSettings):
         ]
     )
 
-    # LLM provider selection
-    # - "openrouter": use OpenRouter-compatible API (default)
-    # - "openai": use OpenAI API directly
-    LLM_PROVIDER: str = Field(default="openrouter", description="LLM provider: openrouter|openai")
-
-    OPENROUTER_API_KEY: str = Field(default="", description="OpenRouter API key")
-    OPENROUTER_BASE_URL: str = Field(
-        default="https://openrouter.ai/api/v1",
-        description="Base URL for OpenRouter-compatible API",
-    )
-    OPENROUTER_MODEL: str = Field(
-        default="openai/gpt-4.1-mini",
-        description="Model identifier to use with OpenRouter",
-    )
-
     OPENAI_API_KEY: str = Field(default="", description="OpenAI API key")
     OPENAI_BASE_URL: str = Field(
         default="https://api.openai.com/v1",
